@@ -1,55 +1,21 @@
-# Database files
+# Database
 *.db
 *.sqlite
-*.sqlite3
-database.db
 
-# Configuration files with sensitive data
+# Config with credentials
 config.php
 .env
-.env.local
 
-# Composer dependencies
-/vendor/
-composer.lock
+# Dependencies (if using Composer)
+vendor/
 
-# IDE and Editor files
+# IDE
 .vscode/
 .idea/
-*.sublime-project
-*.sublime-workspace
-*.swp
-*.swo
-*~
 
 # OS files
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
-desktop.ini
 
-# Log files
+# Logs
 *.log
-logs/
-error.log
-access.log
-
-# Temporary files
-tmp/
-temp/
-*.tmp
-*.cache
-
-# Uploaded files
-uploads/
-storage/
-
-# Backup files
-*.bak
-*.backup
-*~
-
