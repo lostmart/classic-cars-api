@@ -5,17 +5,16 @@ simple-restPHP/
 ├── .htaccess
 ├── index.php (entry point)
 ├── config.php (or config/)
-├── routes/
-│   └── api.php (defines all routes)
+├── routes.php (defines all routes)
 ├── controllers/
 │   └── UserController.php
 ├── services/
 │   └── UserService.php
 ├── models/
 │   └── User.php (data model/entity)
-├── repositories/ (optional but recommended)
+├── repositories/
 │   └── UserRepository.php
-├── middlewares/ (optional)
+├── middlewares/
 │   └── AuthMiddleware.php
 ├── helpers/ or utils/
 │   └── Response.php

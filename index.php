@@ -20,7 +20,7 @@ set_exception_handler(function($e) {
 
 // Set response headers
 header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *'); // CORS - Allow all origins (adjust for production)
+header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 
@@ -34,12 +34,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 $method = $_SERVER['REQUEST_METHOD'];
 
 // Parse the request URI
-// Remove query string if present
 $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
-// Remove base path (adjust this based on your server setup)
-// If your app is in root, use: $requestUri
-// If in subdirectory like /simple-restPHP/, we need to remove it
+// Remove base path
 $basePath = '/simple-restPHP'; 
 $requestUri = str_replace($basePath, '', $requestUri);
 
@@ -57,62 +54,70 @@ $id = isset($uriParts[2]) ? $uriParts[2] : null;
 // Get request body (for POST and PUT requests)
 $input = json_decode(file_get_contents('php://input'), true);
 
-
-echo json_encode([
-    'method' => $method,
-    'endpoint' => $endpoint,
-]);
-
-// Load configuration
+// Load configuration (we'll create this next)
 // require_once 'config.php';
 
-// Load helpers
-// require_once 'helpers/Response.php';
-
 // Route to appropriate controller based on endpoint
-/*
 try {
     switch ($endpoint) {
         case 'users':
-            // Load the UserController
-            require_once 'controllers/UserController.php';
-            $controller = new UserController($pdo);
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Users endpoint reached via clean URL!',
+                'method' => $method,
+                'endpoint' => $endpoint,
+                'id' => $id,
+                'note' => '.htaccess is working! 🎉'
+            ], JSON_PRETTY_PRINT);
             
-            // Route based on HTTP method and whether ID is present
-            if ($method === 'GET' && $id === null) {
-                // GET /api/users - Get all users
-                $controller->index();
-            } elseif ($method === 'GET' && $id !== null) {
-                // GET /api/users/{id} - Get single user
-                $controller->show($id);
-            } elseif ($method === 'POST' && $id === null) {
-                // POST /api/users - Create new user
-                $controller->store($input);
-            } elseif ($method === 'PUT' && $id !== null) {
-                // PUT /api/users/{id} - Update user
-                $controller->update($id, $input);
-            } elseif ($method === 'DELETE' && $id !== null) {
-                // DELETE /api/users/{id} - Delete user
-                $controller->destroy($id);
-            } else {
-                Response::error('Method not allowed', 405);
-            }
+            // Later we'll uncomment this to use the actual controller:
+            // require_once 'controllers/UserController.php';
+            // $controller = new UserController($pdo);
+            // 
+            // if ($method === 'GET' && $id === null) {
+            //     $controller->index();
+            // } elseif ($method === 'GET' && $id !== null) {
+            //     $controller->show($id);
+            // } elseif ($method === 'POST' && $id === null) {
+            //     $controller->store();
+            // } elseif ($method === 'PUT' && $id !== null) {
+            //     $controller->update($id);
+            // } elseif ($method === 'DELETE' && $id !== null) {
+            //     $controller->destroy($id);
+            // }
             break;
             
-        // Add more endpoints here as you build them
-        // case 'products':
-        //     require_once 'controllers/ProductController.php';
-        //     $controller = new ProductController($pdo);
-        //     ...
-        //     break;
+        case '':
+            // Root endpoint - API documentation
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Welcome to Classic Cars REST API',
+                'version' => '1.0',
+                'endpoints' => [
+                    'GET /api/users' => 'Get all users',
+                    'GET /api/users/:id' => 'Get single user',
+                    'POST /api/users' => 'Create user',
+                    'PUT /api/users/:id' => 'Update user',
+                    'DELETE /api/users/:id' => 'Delete user'
+                ]
+            ], JSON_PRETTY_PRINT);
+            break;
             
         default:
-            Response::error('Endpoint not found', 404);
+            http_response_code(404);
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Endpoint not found',
+                'requested' => $endpoint,
+                'available' => ['users']
+            ], JSON_PRETTY_PRINT);
             break;
     }
     
 } catch (Exception $e) {
-    // Catch any uncaught exceptions and return error response
-    Response::error($e->getMessage(), 500);
+    http_response_code(500);
+    echo json_encode([
+        'status' => 'error',
+        'message' => $e->getMessage()
+    ], JSON_PRETTY_PRINT);
 }
-    */
