@@ -2,48 +2,66 @@
 
 namespace App\Controllers;
 
+use App\Repositories\TourRepository;
+
 class TourController
 {
+    private TourRepository $repository;
+    
+    public function __construct()
+    {
+        $this->repository = new TourRepository();
+    }
+    
     public function create($request, $response)
     {
-        $db = $GLOBALS['db'];
-        
-        // Create tours table
-        $db->exec("
-            CREATE TABLE IF NOT EXISTS tours (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL,
-                description TEXT NOT NULL,
-                duration_minutes INTEGER NOT NULL,
-                price REAL NOT NULL
-            )
-        ");
+        $this->repository->createTable();
         
         $data = [
             'success' => true,
             'message' => 'Tours table created successfully'
         ];
         
-        $response->getBody()->write(json_encode($data));
+        $response->getBody()->write(json_encode($data, JSON_PRETTY_PRINT));
         return $response->withHeader('Content-Type', 'application/json');
     }
     
     public function add($request, $response)
     {
-        $db = $GLOBALS['db'];
+        // Get data from request body
+        $body = $request->getParsedBody();
         
-        // Insert one tour
-        $db->exec("
-            INSERT INTO tours (name, description, duration_minutes, price) 
-            VALUES ('Romantic Seine Tour', 'Cruise along the Seine passing by Notre-Dame and Eiffel Tower', 60, 120.00)
-        ");
+        // Validate required fields
+        if (!isset($body['name']) || !isset($body['description']) || 
+            !isset($body['duration_minutes']) || !isset($body['price'])) {
+            
+            $data = [
+                'success' => false,
+                'message' => 'Missing required fields: name, description, duration_minutes, price'
+            ];
+            
+            $response->getBody()->write(json_encode($data, JSON_PRETTY_PRINT));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
+        }
+        
+        // Prepare data for insertion
+        $tourData = [
+            'name' => $body['name'],
+            'description' => $body['description'],
+            'duration_minutes' => (int) $body['duration_minutes'],
+            'price' => (float) $body['price']
+        ];
+        
+        // Insert into database
+        $this->repository->insert($tourData);
         
         $data = [
             'success' => true,
-            'message' => 'Tour added successfully'
+            'message' => 'Tour added successfully',
+            'data' => $tourData
         ];
         
-        $response->getBody()->write(json_encode($data));
-        return $response->withHeader('Content-Type', 'application/json');
+        $response->getBody()->write(json_encode($data, JSON_PRETTY_PRINT));
+        return $response->withHeader('Content-Type', 'application/json')->withStatus(201);
     }
 }

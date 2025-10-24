@@ -11,6 +11,10 @@ $dotenv->load();
 // Create app
 $app = AppFactory::create();
 
+
+// Add body parsing middleware
+$app->addBodyParsingMiddleware();
+
 // Add routing middleware
 $app->addRoutingMiddleware();
 
