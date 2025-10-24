@@ -1,0 +1,24 @@
+{
+	"name": "paris-classic-tours/api",
+	"description": "REST API for Paris Classic Car Tours management system",
+	"type": "project",
+	"require": {
+		"php": "^8.0",
+		"slim/slim": "^4.12",
+		"slim/psr7": "^1.6",
+		"php-di/php-di": "^7.0",
+		"vlucas/phpdotenv": "^5.5"
+	},
+	"require-dev": {
+		"phpunit/phpunit": "^10.0"
+	},
+	"autoload": {
+		"psr-4": {
+			"App\\": "src/"
+		}
+	},
+	"config": {
+		"process-timeout": 0,
+		"sort-packages": true
+	}
+}
