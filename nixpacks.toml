@@ -5,4 +5,15 @@ nixPkgs = ["php82", "php82Extensions.pdo", "php82Extensions.pdo_sqlite", "php82E
 cmds = ["composer install --no-dev --optimize-autoloader"]
 
 [start]
-cmd = "php -S 0.0.0.0:$PORT -t public router.php"
+cmd = "php -S 0.0.0.0:$PORT public/index.php"
+```
+
+This tells PHP's built-in server to route ALL requests through `public/index.php`, which is exactly what Slim needs.
+
+## Also: Check Railway Environment Variables
+
+Make sure you added the environment variables in Railway's Variables tab:
+```
+APP_NAME=Paris Classic Tours API
+DB_PATH=database/database.sqlite
+APP_DEBUG=true
