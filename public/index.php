@@ -26,6 +26,7 @@ $GLOBALS['db'] = $db;
 
 // Load routes from separate file
 require __DIR__ . '/../src/routes/routes.php';
+require __DIR__ . '/../src/routes/tours.php';  // tours routes
 
 // Run app
 $app->run();

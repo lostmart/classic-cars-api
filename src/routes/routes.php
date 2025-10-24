@@ -2,26 +2,34 @@
 
 use App\Controllers\TourController;
 
-// Define all your routes here
+// API v1 group
+$app->group('/api/v1', function ($group) {
+    
+    // Welcome endpoint
+    $group->get('', function ($request, $response) {
+        $data = [
+            'success' => true,
+            'message' => 'Welcome to the Paris Classic Tours API',
+            'app_name' => $_ENV['APP_NAME'],
+            'version' => 'v1',
+            'timestamp' => date('c')
+        ];
+        
+        $response->getBody()->write(json_encode($data, JSON_PRETTY_PRINT));
+        return $response->withHeader('Content-Type', 'application/json');
+    });
 
-$app->get('/hello', function ($request, $response) {
-    $data = [
-        'message' => 'Hello World',
-        'app_name' => $_ENV['APP_NAME']  // NEW!
-    ];
-    $response->getBody()->write(json_encode($data));
-    return $response->withHeader('Content-Type', 'application/json');
+    // Health check endpoint
+    $group->get('/health', function ($request, $response) {
+        $data = [
+            'success' => true,
+            'status' => 'healthy',
+            'database' => 'connected',
+            'timestamp' => date('c')
+        ];
+        
+        $response->getBody()->write(json_encode($data, JSON_PRETTY_PRINT));
+        return $response->withHeader('Content-Type', 'application/json');
+    });
+    
 });
-
-$app->get('/goodbye', function ($request, $response) {
-    $data = ['message' => 'Goodbye World'];
-    $response->getBody()->write(json_encode($data));
-    return $response->withHeader('Content-Type', 'application/json');
-});
-
-
-// Controller routes - NEW!
-$tourController = new TourController();
-
-$app->get('/create-tours', [$tourController, 'create']);
-$app->get('/add-tour', [$tourController, 'add']);
