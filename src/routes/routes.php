@@ -10,7 +10,7 @@ $app->group('/api/v1', function ($group) {
         $data = [
             'success' => true,
             'message' => 'Welcome to the Paris Classic Tours API',
-            'app_name' => $_ENV['APP_NAME'],
+            'app_name' => getenv('APP_NAME') ?: $_ENV['APP_NAME'] ?? 'Paris Classic Tours API',
             'version' => 'v1',
             'timestamp' => date('c')
         ];
