@@ -1,49 +1,46 @@
 <?php
 /**
- * Authentication Middleware (Example)
- * Checks for API key in headers
- * Similar to your Node.js checkApiKey middleware
+ * JSON Middleware
+ * Parses JSON request bodies and sets JSON response header
+ * Equivalent to Express: app.use(express.json())
  */
 
-class AuthMiddleware {
-    
-    private $apiKey;
-    private $excludedRoutes;
+class JsonMiddleware {
     
     /**
-     * Constructor
-     * @param string $apiKey - The valid API key
-     * @param array $excludedRoutes - Routes that don't need auth
-     */
-    public function __construct($apiKey = 'your-secret-api-key', $excludedRoutes = ['/']) {
-        $this->apiKey = $apiKey;
-        $this->excludedRoutes = $excludedRoutes;
-    }
-    
-    /**
-     * Check authentication
+     * Handle JSON parsing and response setup
      */
     public function handle($request, $next) {
-        // Skip auth for excluded routes
-        if (in_array($request['uri'], $this->excludedRoutes)) {
-            return $next($request);
+        // Set JSON response header
+        header('Content-Type: application/json; charset=utf-8');
+        
+        // Parse JSON body for POST, PUT, PATCH requests
+        if (in_array($request['method'], ['POST', 'PUT', 'PATCH'])) {
+            $input = file_get_contents('php://input');
+            
+            if (!empty($input)) {
+                $decoded = json_decode($input, true);
+                
+                // Check for JSON errors
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    http_response_code(400);
+                    echo json_encode([
+                        'status' => 'error',
+                        'message' => 'Invalid JSON: ' . json_last_error_msg()
+                    ]);
+                    exit;
+                }
+                
+                // Add parsed body to request
+                $request['body'] = $decoded;
+            } else {
+                $request['body'] = [];
+            }
+        } else {
+            $request['body'] = [];
         }
         
-        // Get API key from headers
-        $headers = $request['headers'];
-        $providedKey = $headers['X-API-Key'] ?? $headers['x-api-key'] ?? null;
-        
-        // Check if API key is valid
-        if ($providedKey !== $this->apiKey) {
-            http_response_code(401);
-            echo json_encode([
-                'status' => 'error',
-                'message' => 'Non autorisé: Clé API manquante ou invalide'
-            ]);
-            exit;
-        }
-        
-        // API key is valid, continue
+        // Continue to next middleware
         return $next($request);
     }
 }
