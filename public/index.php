@@ -1,42 +1,30 @@
 <?php
 
-declare(strict_types=1);
-
-use DI\Container;
-use Slim\Factory\AppFactory;
-
 require __DIR__ . '/../vendor/autoload.php';
 
-// Load environment variables
+use Slim\Factory\AppFactory;
+
+// Load environment variables - NEW!
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/..');
 $dotenv->load();
 
-// Create Container
-$container = new Container();
-
-// Set container to create App with on AppFactory
-AppFactory::setContainer($container);
-
-// Create App
+// Create app
 $app = AppFactory::create();
 
-// Add Routing Middleware
+// Add routing middleware
 $app->addRoutingMiddleware();
 
-// Add Error Middleware
-$errorMiddleware = $app->addErrorMiddleware(
-    $_ENV['APP_DEBUG'] === 'true',
-    true,
-    true
-);
+// Add error middleware to see errors clearly
+$app->addErrorMiddleware(true, true, true);
 
-// Load dependencies (database, services, etc.)
-require __DIR__ . '/../bootstrap/dependencies.php';
+// Create database connection - NEW!
+$dbPath = __DIR__ . '/../' . $_ENV['DB_PATH'];
+$db = new PDO('sqlite:' . $dbPath);
+$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-// Load middleware
-require __DIR__ . '/../bootstrap/middleware.php';
+$GLOBALS['db'] = $db;
 
-// Load routes
+// Load routes from separate file
 require __DIR__ . '/../src/routes/routes.php';
 
 // Run app
