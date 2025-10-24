@@ -3,7 +3,7 @@
 	"description": "REST API for Paris Classic Car Tours management system",
 	"type": "project",
 	"require": {
-		"php": "^8.0",
+		"php": "^8.2",
 		"slim/slim": "^4.12",
 		"slim/psr7": "^1.6",
 		"php-di/php-di": "^7.0",
