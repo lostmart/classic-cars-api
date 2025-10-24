@@ -1,113 +1,215 @@
 <?php
-/**
- * API Routes Definition
- * Define all your routes here - similar to Express router
- */
 
-// Create router instance
-$router = new Router();
+declare(strict_types=1);
 
-// ==================== ROOT ROUTE ====================
-// GET / - API Welcome/Documentation
-$router->get('/', function() {
-    echo json_encode([
-        'message' => 'Bienvenue sur l\'API de gestion de voitures classiques',
-        'version' => '1.0.0',
-        'status' => 'success',
-        'endpoints' => [
-            'GET /' => 'Informations sur l\'API',
-            'GET /api/users' => 'Liste des utilisateurs',
-            'GET /api/users/:id' => 'Détails d\'un utilisateur',
-            'POST /api/users' => 'Créer un utilisateur',
-            'PUT /api/users/:id' => 'Modifier un utilisateur',
-            'DELETE /api/users/:id' => 'Supprimer un utilisateur'
-        ],
-        'middleware' => [
-            'CORS' => 'enabled',
-            'Router' => 'enabled'
-        ]
-    ], JSON_PRETTY_PRINT);
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Slim\App;
+
+/** @var App $app */
+
+// Health check endpoint
+$app->get('/', function (Request $request, Response $response) {
+    $data = [
+        'success' => true,
+        'message' => 'Paris Classic Car Tours API',
+        'version' => 'v1',
+        'timestamp' => date('c')
+    ];
+    
+    $response->getBody()->write(json_encode($data));
+    return $response->withHeader('Content-Type', 'application/json');
 });
 
-// ==================== USER ROUTES ====================
-
-// GET /api/users - Get all users
-$router->get('/api/users', function() {
-    echo json_encode([
-        'status' => 'success',
-        'message' => 'Getting all users',
-        'data' => []
-    ], JSON_PRETTY_PRINT);
+// API v1 group
+$app->group('/api/v1', function ($group) {
     
-    // TODO: Connect to controller
-    // require_once __DIR__ . '/controllers/UserController.php';
-    // $controller = new UserController($pdo);
-    // $controller->index();
+    // Public routes
+    $group->get('/health', function (Request $request, Response $response) {
+        $data = [
+            'success' => true,
+            'message' => 'API is running',
+            'database' => 'connected'
+        ];
+        
+        $response->getBody()->write(json_encode($data));
+        return $response->withHeader('Content-Type', 'application/json');
+    });
+    
+    // Tours routes (public - anyone can view)
+    $group->get('/tours', function (Request $request, Response $response) {
+        $db = $this->get('db');
+        
+        $stmt = $db->query("
+            SELECT id, name, description, duration_minutes, price, max_passengers, route_highlights, status 
+            FROM tours 
+            WHERE status = 'active'
+            ORDER BY price ASC
+        ");
+        $tours = $stmt->fetchAll();
+        
+        $data = [
+            'success' => true,
+            'data' => $tours,
+            'count' => count($tours)
+        ];
+        
+        $response->getBody()->write(json_encode($data));
+        return $response->withHeader('Content-Type', 'application/json');
+    });
+    
+    $group->get('/tours/{id}', function (Request $request, Response $response, array $args) {
+        $db = $this->get('db');
+        $tourId = (int) $args['id'];
+        
+        $stmt = $db->prepare("
+            SELECT id, name, description, duration_minutes, price, max_passengers, route_highlights, status 
+            FROM tours 
+            WHERE id = ? AND status = 'active'
+        ");
+        $stmt->execute([$tourId]);
+        $tour = $stmt->fetch();
+        
+        if (!$tour) {
+            $data = [
+                'success' => false,
+                'message' => 'Tour not found'
+            ];
+            $response->getBody()->write(json_encode($data));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(404);
+        }
+        
+        $data = [
+            'success' => true,
+            'data' => $tour
+        ];
+        
+        $response->getBody()->write(json_encode($data));
+        return $response->withHeader('Content-Type', 'application/json');
+    });
+    
+    // Cars routes (public - anyone can view available cars)
+    $group->get('/cars', function (Request $request, Response $response) {
+        $db = $this->get('db');
+        
+        $stmt = $db->query("
+            SELECT c.id, c.make, c.model, c.year, c.color, c.capacity, c.description, c.image_url,
+                   u.first_name as driver_first_name, u.last_name as driver_last_name
+            FROM cars c
+            JOIN users u ON c.driver_id = u.id
+            WHERE c.status = 'available'
+            ORDER BY c.year ASC
+        ");
+        $cars = $stmt->fetchAll();
+        
+        $data = [
+            'success' => true,
+            'data' => $cars,
+            'count' => count($cars)
+        ];
+        
+        $response->getBody()->write(json_encode($data));
+        return $response->withHeader('Content-Type', 'application/json');
+    });
+    
+    $group->get('/cars/{id}', function (Request $request, Response $response, array $args) {
+        $db = $this->get('db');
+        $carId = (int) $args['id'];
+        
+        $stmt = $db->prepare("
+            SELECT c.id, c.make, c.model, c.year, c.color, c.capacity, c.description, c.image_url,
+                   u.first_name as driver_first_name, u.last_name as driver_last_name
+            FROM cars c
+            JOIN users u ON c.driver_id = u.id
+            WHERE c.id = ? AND c.status = 'available'
+        ");
+        $stmt->execute([$carId]);
+        $car = $stmt->fetch();
+        
+        if (!$car) {
+            $data = [
+                'success' => false,
+                'message' => 'Car not found'
+            ];
+            $response->getBody()->write(json_encode($data));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(404);
+        }
+        
+        $data = [
+            'success' => true,
+            'data' => $car
+        ];
+        
+        $response->getBody()->write(json_encode($data));
+        return $response->withHeader('Content-Type', 'application/json');
+    });
+    
+    // Authentication routes (to be implemented)
+    $group->post('/auth/register', function (Request $request, Response $response) {
+        $data = [
+            'success' => false,
+            'message' => 'Registration endpoint - to be implemented'
+        ];
+        
+        $response->getBody()->write(json_encode($data));
+        return $response->withHeader('Content-Type', 'application/json')->withStatus(501);
+    });
+    
+    $group->post('/auth/login', function (Request $request, Response $response) {
+        $data = [
+            'success' => false,
+            'message' => 'Login endpoint - to be implemented'
+        ];
+        
+        $response->getBody()->write(json_encode($data));
+        return $response->withHeader('Content-Type', 'application/json')->withStatus(501);
+    });
+    
+    // Protected routes (require authentication - to be implemented with middleware)
+    $group->group('/bookings', function ($bookingGroup) {
+        $bookingGroup->get('', function (Request $request, Response $response) {
+            $data = [
+                'success' => false,
+                'message' => 'Get bookings endpoint - to be implemented with authentication'
+            ];
+            
+            $response->getBody()->write(json_encode($data));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(501);
+        });
+        
+        $bookingGroup->post('', function (Request $request, Response $response) {
+            $data = [
+                'success' => false,
+                'message' => 'Create booking endpoint - to be implemented with authentication'
+            ];
+            
+            $response->getBody()->write(json_encode($data));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(501);
+        });
+    });
+    
+    // Admin routes (require admin role - to be implemented with middleware)
+    $group->group('/admin', function ($adminGroup) {
+        $adminGroup->get('/users', function (Request $request, Response $response) {
+            $data = [
+                'success' => false,
+                'message' => 'Admin users endpoint - to be implemented with role checking'
+            ];
+            
+            $response->getBody()->write(json_encode($data));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(501);
+        });
+    });
 });
 
-// GET /api/users/:id - Get single user
-$router->get('/api/users/:id', function($id) {
-    echo json_encode([
-        'status' => 'success',
-        'message' => 'Getting user by ID',
-        'id' => $id,
-        'data' => null
-    ], JSON_PRETTY_PRINT);
+// 404 handler
+$app->map(['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], '/{routes:.+}', function (Request $request, Response $response) {
+    $data = [
+        'success' => false,
+        'message' => 'Endpoint not found',
+        'path' => $request->getUri()->getPath()
+    ];
     
-    // TODO: Connect to controller
-    // require_once __DIR__ . '/controllers/UserController.php';
-    // $controller = new UserController($pdo);
-    // $controller->show($id);
+    $response->getBody()->write(json_encode($data));
+    return $response->withHeader('Content-Type', 'application/json')->withStatus(404);
 });
-
-// POST /api/users - Create new user
-$router->post('/api/users', function() {
-    // Get JSON body
-    $input = json_decode(file_get_contents('php://input'), true);
-    
-    echo json_encode([
-        'status' => 'success',
-        'message' => 'Creating new user',
-        'received_data' => $input
-    ], JSON_PRETTY_PRINT);
-    
-    // TODO: Connect to controller
-    // require_once __DIR__ . '/controllers/UserController.php';
-    // $controller = new UserController($pdo);
-    // $controller->store();
-});
-
-// PUT /api/users/:id - Update user
-$router->put('/api/users/:id', function($id) {
-    // Get JSON body
-    $input = json_decode(file_get_contents('php://input'), true);
-    
-    echo json_encode([
-        'status' => 'success',
-        'message' => 'Updating user',
-        'id' => $id,
-        'received_data' => $input
-    ], JSON_PRETTY_PRINT);
-    
-    // TODO: Connect to controller
-    // require_once __DIR__ . '/controllers/UserController.php';
-    // $controller = new UserController($pdo);
-    // $controller->update($id);
-});
-
-// DELETE /api/users/:id - Delete user
-$router->delete('/api/users/:id', function($id) {
-    echo json_encode([
-        'status' => 'success',
-        'message' => 'Deleting user',
-        'id' => $id
-    ], JSON_PRETTY_PRINT);
-    
-    // TODO: Connect to controller
-    // require_once __DIR__ . '/controllers/UserController.php';
-    // $controller = new UserController($pdo);
-    // $controller->destroy($id);
-});
-
-// Return the router instance
-return $router;
