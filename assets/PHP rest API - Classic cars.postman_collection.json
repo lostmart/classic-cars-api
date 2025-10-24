@@ -1,0 +1,31 @@
+{
+	"info": {
+		"_postman_id": "b4c617f8-8976-4ac2-9a23-b61864cfba32",
+		"name": "PHP rest API - Classic cars",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "20546514"
+	},
+	"item": [
+		{
+			"name": "home endpoint",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost/simple-restPHP",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"path": [
+						"simple-restPHP"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
