@@ -1,21 +1,31 @@
-# Database
-*.db
-*.sqlite
-
-# Config with credentials
-config.php
+# Environment files
 .env
 
-# Dependencies (if using Composer)
-vendor/
+# Dependencies
+/vendor/
+
+# Database
+database/*.sqlite
+database/*.db
 
 # IDE
-.vscode/
 .idea/
+.vscode/
+*.swp
+*.swo
+*~
 
-# OS files
+# OS
 .DS_Store
 Thumbs.db
 
 # Logs
 *.log
+
+# Cache
+cache/
+temp/
+tmp/
+
+# Composer
+composer.lock

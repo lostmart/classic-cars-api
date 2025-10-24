@@ -1,158 +1,214 @@
-## Public deplyment
+# Paris Classic Car Tours - REST API
 
-https://classic-cars-api-production.up.railway.app/
+A REST API for managing a Paris-based classic car tour company, built with PHP and Slim Framework.
 
-## Folder Structure
+## Features
 
-```
-simple-restPHP/
-├── .htaccess
-├── index.php (entry point)
-├── config.php (or config/)
-├── routes.php (defines all routes)
-├── controllers/
-│   └── UserController.php
-├── services/
-│   └── UserService.php
-├── models/
-│   └── User.php (data model/entity)
-├── repositories/
-│   └── UserRepository.php
-├── middlewares/
-│   └── AuthMiddleware.php
-├── helpers/ or utils/
-│   └── Response.php
-│   └── Validator.php
-└── database.db
-```
+- User management (Customers, Drivers, Administrators)
+- Classic car fleet management
+- Tour route management
+- Booking system
+- SQLite database with automatic initialization
+- RESTful API design
 
-## API Endpoints
+## Requirements
 
-```
-GET    /api/users         - Get all users
-GET    /api/users/{id}    - Get specific user
-POST   /api/users         - Create new user
-PUT    /api/users/{id}    - Update user
-DELETE /api/users/{id}    - Delete user
+- PHP 8.0 or higher
+- Composer
+- SQLite3
+- Apache/Nginx web server
+
+## Installation
+
+### 1. Clone the repository
+
+```bash
+git clone <your-repo-url>
+cd paris-classic-tours-api
 ```
 
-## Request/Response Examples
+### 2. Install dependencies
 
-**Create a user (POST /api/users):**
-
+```bash
+composer install
 ```
-Request body: { "name": "John", "email": "john@example.com" }
-Response: {
-    "status": "success",
-    "data": {
-        "id": 1,
-        "name": "John",
-        "email": "john@example.com"
+
+### 3. Configure environment
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` file and adjust settings as needed.
+
+### 4. Set up web server
+
+#### Apache
+
+Point your virtual host to the `public/` directory. The `.htaccess` file will handle routing.
+
+Example Apache virtual host:
+
+```apache
+<VirtualHost *:80>
+    DocumentRoot "/path/to/project/public"
+    ServerName api.parisclassictours.local
+
+    <Directory "/path/to/project/public">
+        AllowOverride All
+        Require all granted
+    </Directory>
+</VirtualHost>
+```
+
+#### Nginx
+
+```nginx
+server {
+    listen 80;
+    server_name api.parisclassictours.local;
+    root /path/to/project/public;
+    index index.php;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        fastcgi_pass unix:/var/run/php/php8.0-fpm.sock;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
     }
 }
 ```
 
-**Get all users (GET /api/users):**
+### 5. Initialize database
+
+The database will be automatically initialized on first run with:
+
+- Table creation
+- Seed data (users, cars, tours, sample bookings)
+
+Just access any endpoint and the initialization will trigger.
+
+## Development
+
+### Using PHP built-in server (for development only)
+
+```bash
+php -S localhost:8000 -t public
+```
+
+Then access: `http://localhost:8000`
+
+## API Endpoints
+
+### Public Endpoints
+
+- `GET /` - API welcome message
+- `GET /api/v1/health` - Health check
+- `GET /api/v1/tours` - List all active tours
+- `GET /api/v1/tours/{id}` - Get tour details
+- `GET /api/v1/cars` - List all available cars
+- `GET /api/v1/cars/{id}` - Get car details
+
+### Authentication (To be implemented)
+
+- `POST /api/v1/auth/register` - Register new customer
+- `POST /api/v1/auth/login` - Login
+
+### Protected Endpoints (To be implemented)
+
+- `GET /api/v1/bookings` - Get user bookings
+- `POST /api/v1/bookings` - Create new booking
+- `GET /api/v1/bookings/{id}` - Get booking details
+- `PUT /api/v1/bookings/{id}` - Update booking
+- `DELETE /api/v1/bookings/{id}` - Cancel booking
+
+### Admin Endpoints (To be implemented)
+
+- Full CRUD operations on all resources
+
+## Default Credentials
+
+After initialization, you can use these test accounts:
+
+**Admin:**
+
+- Email: `admin@parisclassictours.fr`
+- Password: `admin123`
+
+**Driver:**
+
+- Email: `pierre.martin@parisclassictours.fr`
+- Password: `driver123`
+
+**Customer:**
+
+- Email: `marie.lefevre@email.fr`
+- Password: `customer123`
+
+## Project Structure
 
 ```
-Response: {
-    "status": "success",
-    "data": [
-        {user1},
-        {user2},
-        ...
-        ]
-    }
+├── assets/              # Postman collections, documentation
+├── bootstrap/           # Application initialization
+│   ├── dependencies.php # DI container configuration
+│   └── middleware.php   # Global middleware registration
+├── config/              # Configuration files
+├── database/            # Database files
+│   └── init.php         # Database schema and seeding
+├── public/              # Web server document root
+│   ├── .htaccess        # Apache rewrite rules
+│   └── index.php        # Application entry point
+├── src/                 # Application source code
+│   ├── controllers/     # Request handlers
+│   ├── middlewares/     # Custom middleware
+│   ├── models/          # Data models/entities
+│   ├── repositories/    # Database access layer
+│   └── routes/          # Route definitions
+├── tests/               # Unit and integration tests
+├── .env.example         # Environment variables template
+├── .gitignore           # Git ignore rules
+├── composer.json        # PHP dependencies
+└── README.md            # This file
 ```
 
-## Layer Responsibilities Explained
+## Testing
 
-### 1. **Routes** (`routes/api.php`)
-
-- **Purpose**: Define all API endpoints and map them to controllers
-- **Contains**: URL patterns and which controller method handles each
-- **Example**: `GET /api/users → UserController::index()`
-- **Why**: Centralized routing makes it easy to see all available endpoints
-
-### 2. **Controllers** (`controllers/UserController.php`)
-
-- **Purpose**: Handle HTTP requests and responses
-- **Contains**: Methods like `index()`, `show()`, `store()`, `update()`, `destroy()`
-- **Responsibilities**:
-  - Receive request data
-  - Validate input (or delegate to validator)
-  - Call appropriate service methods
-  - Format and return HTTP responses
-- **Does NOT**: Contain business logic or database queries
-- **Example**: Receives POST request, validates, calls UserService, returns JSON
-
-### 3. **Services** (`services/UserService.php`)
-
-- **Purpose**: Business logic layer
-- **Contains**: The "what" and "how" of your application
-- **Responsibilities**:
-  - Complex business rules
-  - Orchestrate multiple repository calls
-  - Data transformation
-  - Transaction management
-- **Example**: `createUser()` might check for duplicates, hash passwords, send welcome email
-- **Does NOT**: Know about HTTP or database specifics
-
-### 4. **Models** (`models/User.php`)
-
-- **Purpose**: Represent data entities
-- **Contains**: Properties and basic getters/setters
-- **Can include**: Validation rules, data casting, relationships
-- **Example**: User object with id, name, email properties
-- **Note**: This is the data structure, not database operations
-
-### 5. **Repositories** (`repositories/UserRepository.php`) - Optional but Recommended
-
-- **Purpose**: Data access layer (database operations)
-- **Contains**: All SQL queries and database interactions
-- **Responsibilities**:
-  - CRUD operations
-  - Complex queries
-  - Database-specific logic
-- **Why**: Abstracts database from business logic (could swap MySQL for PostgreSQL easily)
-- **Example**: `findById()`, `findAll()`, `create()`, `update()`, `delete()`
-
-### 6. **Middlewares** (`middlewares/`) - Optional
-
-- **Purpose**: Pre-process requests before they reach controllers
-- **Examples**:
-  - Authentication (check API keys, JWT tokens)
-  - Rate limiting
-  - CORS handling
-  - Request logging
-- **Execution**: Runs before controller methods
-
-### 7. **Helpers/Utils** (`helpers/`)
-
-- **Purpose**: Reusable utility functions
-- **Examples**:
-  - `Response.php`: Standard JSON response formatting
-  - `Validator.php`: Input validation
-  - `Database.php`: Database connection helper
-
-## Request Flow Example
-
-When `POST /api/users` with user data arrives:
-
+```bash
+vendor/bin/phpunit
 ```
-1. .htaccess → index.php
-2. index.php loads routes/api.php
-3. Router matches route and calls UserController::store()
-4. Controller:
-   - Validates input using Validator helper
-   - Calls UserService::createUser($data)
-5. Service:
-   - Applies business logic (check duplicates, hash password)
-   - Calls UserRepository::create($data)
-6. Repository:
-   - Executes SQL INSERT
-   - Returns User model
-7. Service returns User model to Controller
-8. Controller formats response using Response helper
-9. JSON sent back to client with status 201
-```
+
+## Deployment
+
+### Railway
+
+1. Connect your GitHub repository to Railway
+2. Set environment variables in Railway dashboard
+3. Railway will automatically deploy on push to main
+
+### Manual Deployment
+
+1. Upload files to server (excluding vendor/ and database/)
+2. Run `composer install --no-dev --optimize-autoloader`
+3. Set proper file permissions
+4. Configure web server
+5. Set environment variables
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## License
+
+Private project - All rights reserved
+
+## Support
+
+For issues and questions, please open an issue on GitHub.
