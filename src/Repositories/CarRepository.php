@@ -13,6 +13,18 @@ class CarRepository
         $this->db = $GLOBALS['db'];
     }
     
+    // ADD THIS NEW METHOD
+    private function ensureTableExists(): void
+    {
+        try {
+            // Check if table exists by querying it
+            $this->db->query("SELECT 1 FROM cars LIMIT 1");
+        } catch (\PDOException $e) {
+            // Table doesn't exist, create it
+            $this->createTable();
+        }
+    }
+    
     public function createTable(): bool
     {
         $this->db->exec("
@@ -39,6 +51,8 @@ class CarRepository
     
     public function insert(array $data): int
     {
+        $this->ensureTableExists(); // ADD THIS LINE
+        
         // Remove id if it exists (it's auto-increment)
         unset($data['id']);
         
@@ -60,6 +74,8 @@ class CarRepository
     
     public function findAll(): array
     {
+        $this->ensureTableExists(); // ADD THIS LINE
+        
         $stmt = $this->db->query("SELECT * FROM cars");
         $cars = $stmt->fetchAll();
         
@@ -72,6 +88,8 @@ class CarRepository
     
     public function findById(int $id): ?array
     {
+        $this->ensureTableExists(); // ADD THIS LINE
+        
         $stmt = $this->db->prepare("SELECT * FROM cars WHERE id = :id");
         $stmt->execute(['id' => $id]);
         $car = $stmt->fetch();
@@ -87,6 +105,8 @@ class CarRepository
     
     public function findByStatus(string $status): array
     {
+        $this->ensureTableExists(); // ADD THIS LINE
+        
         $stmt = $this->db->prepare("SELECT * FROM cars WHERE status = :status");
         $stmt->execute(['status' => $status]);
         $cars = $stmt->fetchAll();
@@ -100,6 +120,8 @@ class CarRepository
     
     public function findByDriverId(int $driver_id): ?array
     {
+        $this->ensureTableExists(); // ADD THIS LINE
+        
         $stmt = $this->db->prepare("SELECT * FROM cars WHERE driver_id = :driver_id");
         $stmt->execute(['driver_id' => $driver_id]);
         $car = $stmt->fetch();
@@ -115,6 +137,8 @@ class CarRepository
     
     public function update(int $id, array $data): bool
     {
+        $this->ensureTableExists(); // ADD THIS LINE
+        
         // Remove id from data to avoid updating it
         unset($data['id']);
         
@@ -147,6 +171,8 @@ class CarRepository
     
     public function updateStatus(int $id, string $status): bool
     {
+        $this->ensureTableExists(); // ADD THIS LINE
+        
         $stmt = $this->db->prepare("
             UPDATE cars 
             SET status = :status, updated_at = CURRENT_TIMESTAMP 
@@ -158,12 +184,16 @@ class CarRepository
     
     public function delete(int $id): bool
     {
+        $this->ensureTableExists(); // ADD THIS LINE
+        
         $stmt = $this->db->prepare("DELETE FROM cars WHERE id = :id");
         return $stmt->execute(['id' => $id]);
     }
     
     public function existsByLicensePlate(string $license_plate): bool
     {
+        $this->ensureTableExists(); // ADD THIS LINE
+        
         $stmt = $this->db->prepare("SELECT COUNT(*) as count FROM cars WHERE license_plate = :license_plate");
         $stmt->execute(['license_plate' => $license_plate]);
         $result = $stmt->fetch();
@@ -173,6 +203,8 @@ class CarRepository
     
     public function isDriverAssigned(int $driver_id): bool
     {
+        $this->ensureTableExists(); // ADD THIS LINE
+        
         $stmt = $this->db->prepare("SELECT COUNT(*) as count FROM cars WHERE driver_id = :driver_id");
         $stmt->execute(['driver_id' => $driver_id]);
         $result = $stmt->fetch();

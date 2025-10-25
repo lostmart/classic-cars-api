@@ -7,14 +7,17 @@ $carController = new CarController();
 // API v1 cars group
 $app->group('/api/v1', function ($group) use ($carController) {
     
+    // Table initialization (development only)
     $group->get('/cars/create-table', [$carController, 'create']);
+    
+    // RESTful CRUD endpoints - NO /add suffix
     $group->get('/cars', [$carController, 'getAll']);
-    $group->post('/cars/add', [$carController, 'add']);
+    $group->post('/cars', [$carController, 'add']);      
     $group->get('/cars/{id}', [$carController, 'getById']);
     $group->put('/cars/{id}', [$carController, 'update']);
     $group->delete('/cars/{id}', [$carController, 'delete']);
     
-    // Additional car-specific routes
+    // Additional specific routes (these come AFTER the generic ones)
     $group->get('/cars/status/{status}', [$carController, 'getByStatus']);
     $group->get('/cars/driver/{driver_id}', [$carController, 'getByDriverId']);
     $group->patch('/cars/{id}/status', [$carController, 'updateStatus']);
