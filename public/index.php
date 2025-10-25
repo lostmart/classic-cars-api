@@ -35,6 +35,27 @@ $db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 // Make database available globally
 $GLOBALS['db'] = $db;
 
+
+// Auto-seed database if empty
+function isDatabaseEmpty(PDO $db): bool
+{
+    try {
+        // Check if users table exists and has data
+        $stmt = $db->query("SELECT COUNT(*) as count FROM users");
+        $result = $stmt->fetch();
+        return $result['count'] == 0;
+    } catch (PDOException $e) {
+        // Table doesn't exist, database is empty
+        return true;
+    }
+}
+
+if (isDatabaseEmpty($db)) {
+    echo "Database is empty. Auto-seeding...\n";
+    require __DIR__ . '/../database/seed.php';
+    echo "Auto-seeding completed!\n\n";
+}
+
 // Load routes
 require __DIR__ . '/../src/routes/routes.php';
 require __DIR__ . '/../src/routes/tours.php';
