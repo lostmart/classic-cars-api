@@ -8,6 +8,7 @@ $tourController = new TourController();
 $app->group('/api/v1', function ($group) use ($tourController) {
     
     $group->get('/tours/create-table', [$tourController, 'create']);
+    $group->get('/tours', [$tourController, 'getAll']);
     $group->post('/tours/add', [$tourController, 'add']);
     
 });

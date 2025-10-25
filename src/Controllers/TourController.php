@@ -15,6 +15,19 @@ class TourController
     {
         $this->repository = new TourRepository();
     }
+
+    public function getAll(Request $request, Response $response): Response
+    {
+        $tours = $this->repository->findAll();
+        
+        $data = [
+            'success' => true,
+            'data' => $tours
+        ];
+        
+        $response->getBody()->write(json_encode($data, JSON_PRETTY_PRINT));
+        return $response->withHeader('Content-Type', 'application/json');
+    }
     
     public function create(Request $request, Response $response): Response
     {
