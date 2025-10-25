@@ -3,6 +3,9 @@
 namespace App\Controllers;
 
 use App\Repositories\TourRepository;
+use App\Models\Tour;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Message\ResponseInterface as Response;
 
 class TourController
 {
@@ -13,7 +16,7 @@ class TourController
         $this->repository = new TourRepository();
     }
     
-    public function create($request, $response)
+    public function create(Request $request, Response $response): Response
     {
         $this->repository->createTable();
         
@@ -26,42 +29,53 @@ class TourController
         return $response->withHeader('Content-Type', 'application/json');
     }
     
-    public function add($request, $response)
+    public function add(Request $request, Response $response): Response
     {
-        // Get data from request body
         $body = $request->getParsedBody();
         
-        // Validate required fields
-        if (!isset($body['name']) || !isset($body['description']) || 
-            !isset($body['duration_minutes']) || !isset($body['price'])) {
-            
+        // Validate using Tour model
+        $errors = Tour::validate($body);
+        
+        if (!empty($errors)) {
             $data = [
                 'success' => false,
-                'message' => 'Missing required fields: name, description, duration_minutes, price'
+                'message' => 'Validation failed',
+                'errors' => $errors
             ];
             
             $response->getBody()->write(json_encode($data, JSON_PRETTY_PRINT));
             return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
         }
         
-        // Prepare data for insertion
-        $tourData = [
-            'name' => $body['name'],
-            'description' => $body['description'],
-            'duration_minutes' => (int) $body['duration_minutes'],
-            'price' => (float) $body['price']
-        ];
-        
-        // Insert into database
-        $this->repository->insert($tourData);
-        
-        $data = [
-            'success' => true,
-            'message' => 'Tour added successfully',
-            'data' => $tourData
-        ];
-        
-        $response->getBody()->write(json_encode($data, JSON_PRETTY_PRINT));
-        return $response->withHeader('Content-Type', 'application/json')->withStatus(201);
+        try {
+            // Create Tour model
+            $tour = Tour::fromArray($body);
+            
+            // Insert into database and get the ID
+            $insertedId = $this->repository->insert($tour->toArray());
+            
+            // Create response data with the inserted ID
+            $tourData = $tour->toArray();
+            $tourData['id'] = $insertedId;
+            
+            $data = [
+                'success' => true,
+                'message' => 'Tour added successfully',
+                'data' => $tourData
+            ];
+            
+            $response->getBody()->write(json_encode($data, JSON_PRETTY_PRINT));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(201);
+            
+        } catch (\InvalidArgumentException $e) {
+            $data = [
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => [$e->getMessage()]
+            ];
+            
+            $response->getBody()->write(json_encode($data, JSON_PRETTY_PRINT));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
+        }
     }
 }

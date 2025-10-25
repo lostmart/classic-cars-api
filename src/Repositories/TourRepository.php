@@ -28,14 +28,20 @@ class TourRepository
         return true;
     }
     
-    public function insert(array $data): bool
+    public function insert(array $data): int
     {
+        // Remove id if it exists (it's auto-increment)
+        unset($data['id']);
+        
         $stmt = $this->db->prepare("
             INSERT INTO tours (name, description, duration_minutes, price) 
             VALUES (:name, :description, :duration_minutes, :price)
         ");
         
-        return $stmt->execute($data);
+        $stmt->execute($data);
+        
+        // Return the inserted ID
+        return (int) $this->db->lastInsertId();
     }
     
     public function findAll(): array
