@@ -10,5 +10,8 @@ $app->group('/api/v1', function ($group) use ($tourController) {
     $group->get('/tours/create-table', [$tourController, 'create']);
     $group->get('/tours', [$tourController, 'getAll']);
     $group->post('/tours/add', [$tourController, 'add']);
+    $group->get('/tours/{id}', [$tourController, 'getById']);
+    $group->put('/tours/{id}', [$tourController, 'update']);
+    $group->delete('/tours/{id}', [$tourController, 'delete']);
     
 });

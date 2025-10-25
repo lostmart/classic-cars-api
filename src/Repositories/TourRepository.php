@@ -49,4 +49,32 @@ class TourRepository
         $stmt = $this->db->query("SELECT * FROM tours");
         return $stmt->fetchAll();
     }
+
+    public function findById(int $id): ?array
+    {
+        $stmt = $this->db->prepare("SELECT * FROM tours WHERE id = :id");
+        $stmt->execute(['id' => $id]);
+        $tour = $stmt->fetch();
+        
+        return $tour ?: null;
+    }
+
+    public function update(int $id, array $data): bool
+    {
+        $data['id'] = $id; // Ensure id is in data for the WHERE clause
+        
+        $stmt = $this->db->prepare("
+            UPDATE tours 
+            SET name = :name, description = :description, duration_minutes = :duration_minutes, price = :price 
+            WHERE id = :id
+        ");
+        
+        return $stmt->execute($data);
+    }
+
+    public function delete(int $id): bool
+    {
+        $stmt = $this->db->prepare("DELETE FROM tours WHERE id = :id");
+        return $stmt->execute(['id' => $id]);
+    }
 }
