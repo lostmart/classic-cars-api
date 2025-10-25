@@ -4,19 +4,43 @@ A REST API for managing a Paris-based classic car tour company, built with PHP a
 
 ## Features
 
-- User management (Customers, Drivers, Administrators)
-- Classic car fleet management
 - Tour route management
+- Classic car fleet management
 - Booking system
+- Driver assignment and scheduling
+- Role-based authorization (Customer, Driver, Administrator)
 - SQLite database with automatic initialization
 - RESTful API design
+- External authentication integration
+
+## Architecture
+
+This API focuses on business logic and data management. **Authentication is handled by a separate microservice**, allowing for better separation of concerns and scalability.
+
+### Authentication Flow
+
+```
+User → Auth Microservice → JWT Token → Tours API (validates token)
+```
+
+1. **Authentication Service** (External): Handles user registration, login, password management, and JWT token issuance
+2. **Tours API** (This service): Validates JWT tokens, manages user roles, handles business operations
+
+### User Data Strategy
+
+This API maintains a minimal user reference table synced with the authentication service:
+
+- Stores `external_user_id` matching the auth service's user ID
+- Keeps business-relevant data (name, role, email)
+- **NO passwords or authentication credentials**
+- Focuses on authorization (what users can do) not authentication (who they are)
 
 ## Requirements
 
-- PHP 8.0 or higher
+- PHP 8.2 or higher
 - Composer
 - SQLite3
-- Apache/Nginx web server
+- Apache/Nginx web server (or PHP built-in server for development)
 
 ## Installation
 
@@ -39,7 +63,15 @@ composer install
 cp .env.example .env
 ```
 
-Edit `.env` file and adjust settings as needed.
+Edit `.env` file and adjust settings as needed:
+
+```env
+APP_NAME=Paris Classic Tours API
+DB_PATH=database/database.sqlite
+APP_DEBUG=true
+AUTH_SERVICE_URL=https://your-auth-service.com  # URL of your auth microservice
+JWT_SECRET=your-jwt-secret-key  # Shared secret for JWT validation
+```
 
 ### 4. Set up web server
 
