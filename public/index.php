@@ -41,3 +41,11 @@ require __DIR__ . '/../src/routes/tours.php';
 
 // Run app
 $app->run();
+
+/**************************************************************
+The database will be automatically initialized on first run with:
+
+- Table creation
+- Seed data (users, cars, tours, sample bookings)
+
+***************************************************************/

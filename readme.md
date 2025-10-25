@@ -71,6 +71,7 @@ DB_PATH=database/database.sqlite
 APP_DEBUG=true
 AUTH_SERVICE_URL=https://your-auth-service.com  # URL of your auth microservice
 JWT_SECRET=your-jwt-secret-key  # Shared secret for JWT validation
+MY_API_KEY=your-api-key  # API key for additional security
 ```
 
 ### 4. Set up web server
