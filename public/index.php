@@ -38,6 +38,7 @@ $GLOBALS['db'] = $db;
 // Load routes
 require __DIR__ . '/../src/routes/routes.php';
 require __DIR__ . '/../src/routes/tours.php';
+require __DIR__ . '/../src/routes/cars.php'; 
 
 // Run app
 $app->run();
