@@ -40,6 +40,7 @@ require __DIR__ . '/../src/routes/routes.php';
 require __DIR__ . '/../src/routes/tours.php';
 require __DIR__ . '/../src/routes/cars.php'; 
 require __DIR__ . '/../src/routes/bookings.php';
+require __DIR__ . '/../src/routes/users.php'; 
 
 // Run app
 $app->run();
