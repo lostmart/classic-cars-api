@@ -16,8 +16,10 @@ if (file_exists(__DIR__ . '/../.env')) {
 // Create app
 $app = AppFactory::create();
 
-// Set base path for subdirectory installation (empty string for root deployment like Railway)
-$basePath = $_ENV['APP_BASE_PATH'] ?? '/classic-cars-api/public';
+// Set base path: empty for cloud platforms (Railway, Render), subdirectory for local XAMPP
+// Auto-detect: if RAILWAY_ENVIRONMENT or PORT is set, we're on a cloud platform
+$isCloudPlatform = isset($_ENV['RAILWAY_ENVIRONMENT']) || isset($_ENV['PORT']) || getenv('RAILWAY_ENVIRONMENT') || getenv('PORT');
+$basePath = $_ENV['APP_BASE_PATH'] ?? ($isCloudPlatform ? '' : '/classic-cars-api/public');
 $app->setBasePath($basePath);
 $GLOBALS['basePath'] = $basePath;
 
