@@ -29,3 +29,15 @@ tmp/
 
 # Composer
 composer.lock
+
+node_modules/
+npm-debug.log
+yarn-error.log
+.pnpm-debug.log
+.next/
+.out/
+.build/
+dist/
+.cache/
+.nuxt/
+.svelte-kit/
