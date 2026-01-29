@@ -16,6 +16,9 @@ if (file_exists(__DIR__ . '/../.env')) {
 // Create app
 $app = AppFactory::create();
 
+// Set base path for subdirectory installation
+$app->setBasePath('/classic-cars-api/public');
+
 // Add body parsing middleware
 $app->addBodyParsingMiddleware();
 
