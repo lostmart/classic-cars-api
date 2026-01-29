@@ -185,13 +185,7 @@ class CarController
         // Validate status
         $validStatuses = ['available', 'maintenance', 'retired'];
         if (!in_array($status, $validStatuses)) {
-            $data = [
-                'success' => false,
-                'message' => 'Invalid status. Must be: available, maintenance, or retired'
-            ];
-            
-            $response->getBody()->write(json_encode($data, JSON_PRETTY_PRINT));
-            return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
+            throw new ValidationException('Invalid status. Must be: available, maintenance, or retired');
         }
         
         $cars = $this->repository->findByStatus($status);
@@ -213,13 +207,7 @@ class CarController
         $car = $this->repository->findByDriverId($driverId);
         
         if (!$car) {
-            $data = [
-                'success' => false,
-                'message' => 'No car assigned to this driver'
-            ];
-            
-            $response->getBody()->write(json_encode($data, JSON_PRETTY_PRINT));
-            return $response->withHeader('Content-Type', 'application/json')->withStatus(404);
+            throw new NotFoundException('No car assigned to this driver');
         }
         
         $data = [
@@ -239,35 +227,17 @@ class CarController
         // Check if car exists
         $car = $this->repository->findById($id);
         if (!$car) {
-            $data = [
-                'success' => false,
-                'message' => 'Car not found'
-            ];
-            
-            $response->getBody()->write(json_encode($data, JSON_PRETTY_PRINT));
-            return $response->withHeader('Content-Type', 'application/json')->withStatus(404);
+            throw new NotFoundException('Car not found');
         }
         
         // Validate status
         if (!isset($body['status'])) {
-            $data = [
-                'success' => false,
-                'message' => 'Status is required'
-            ];
-            
-            $response->getBody()->write(json_encode($data, JSON_PRETTY_PRINT));
-            return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
+            throw new ValidationException('Status is required');
         }
         
         $validStatuses = ['available', 'maintenance', 'retired'];
         if (!in_array($body['status'], $validStatuses)) {
-            $data = [
-                'success' => false,
-                'message' => 'Invalid status. Must be: available, maintenance, or retired'
-            ];
-            
-            $response->getBody()->write(json_encode($data, JSON_PRETTY_PRINT));
-            return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
+            throw new ValidationException('Invalid status. Must be: available, maintenance, or retired');
         }
         
         // Update status

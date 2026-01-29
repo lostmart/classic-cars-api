@@ -20,7 +20,8 @@ This REST API manages the complete booking and operational system for the classi
 
 ### Backend
 
-- **Language**: PHP (vanilla, with potential migration to Slim Framework)
+- **Language**: PHP (Slim Framework 4)
+- **Architecture**: Layered (Controllers, Repositories, Models)
 - **Database**: SQLite
 - **Hosting**: Railway (automatic deployment from GitHub)
 
@@ -29,8 +30,9 @@ This REST API manages the complete booking and operational system for the classi
 - **Version Control**: GitHub
 - **CI/CD**: GitHub Actions
 - **Code Quality**: SonarCloud (reporting mode, no build failure)
-- **Testing**: PHPUnit (to be implemented)
-- **Image Storage**: Picsum Photos (placeholder, to be replaced with permanent solution)
+- **Testing**: PHPUnit (Implemented: 128+ unit and integration tests)
+- **Image Storage**: Picsum Photos (placeholder)
+
 
 ### Deployment Strategy
 
@@ -303,33 +305,24 @@ Tours                     Cars
 
 ### Public Endpoints
 
-- `POST /api/v1/auth/register` - Customer registration
-- `POST /api/v1/auth/login` - User login
+- `GET /api/v1/health` - Health check
 - `GET /api/v1/tours` - List all active tours
 - `GET /api/v1/tours/{id}` - Tour details
 - `GET /api/v1/cars` - List available cars
+- `GET /api/v1/cars/{id}` - Car details
 
-### Customer Endpoints (Authenticated)
+### Authenticated Endpoints (Roles: Customer, Driver, Admin)
 
-- `GET /api/v1/bookings` - User's bookings
+- `GET /api/v1/bookings` - All bookings (filtering for customers)
 - `POST /api/v1/bookings` - Create booking
 - `GET /api/v1/bookings/{id}` - Booking details
 - `PUT /api/v1/bookings/{id}` - Update booking
 - `DELETE /api/v1/bookings/{id}` - Cancel booking
-- `GET /api/v1/profile` - User profile
-- `PUT /api/v1/profile` - Update profile
+- `GET /api/v1/bookings/upcoming` - Upcoming tours schedule
+- `GET /api/v1/users` - User list (Admin only)
+- `GET /api/v1/users/{id}` - User profile
+- `POST /api/v1/internal/users/sync` - Sync users from Auth Service
 
-### Driver Endpoints (Authenticated)
-
-- `GET /api/v1/driver/schedule` - Upcoming tours
-- `GET /api/v1/driver/car` - Assigned car details
-- `PUT /api/v1/driver/bookings/{id}` - Update booking status
-
-### Admin Endpoints (Authenticated)
-
-- Full CRUD for: `/api/v1/admin/users`, `/api/v1/admin/cars`, `/api/v1/admin/tours`, `/api/v1/admin/bookings`
-- `POST /api/v1/admin/cars/{id}/assign-driver` - Assign driver to car
-- `GET /api/v1/admin/statistics` - System analytics
 
 ---
 
@@ -514,10 +507,11 @@ A PHP script runs on every application start that:
 
 ## Document Version
 
-- **Version**: 1.0
-- **Date**: October 24, 2025
-- **Status**: Initial Specification
-- **Next Review**: After MVP implementation
+- **Version**: 1.1
+- **Date**: January 29, 2026
+- **Status**: Updated MVP
+- **Next Review**: After Phase 2 implementation
+
 
 ---
 

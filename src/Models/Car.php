@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Exceptions\ValidationException;
+
 class Car
 {
     private ?int $id;
@@ -242,7 +244,7 @@ class Car
     }
     
     // Validate data before creating model
-    public static function validate(array $data): array
+    public static function validate(array $data)
     {
         $errors = [];
         
@@ -310,7 +312,9 @@ class Car
             }
         }
         
-        return $errors;
+        if (!empty($errors)) {
+            throw new ValidationException('Validation failed', $errors);
+        }
     }
     
     // Helper to get full car name

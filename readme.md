@@ -151,68 +151,75 @@ Then access: `http://localhost:8000`
 - `POST /api/v1/auth/register` - Register new customer
 - `POST /api/v1/auth/login` - Login
 
-### Protected Endpoints (To be implemented)
+### Protected Endpoints
 
-- `GET /api/v1/bookings` - Get user bookings
+- `GET /api/v1/bookings` - Get all bookings
 - `POST /api/v1/bookings` - Create new booking
 - `GET /api/v1/bookings/{id}` - Get booking details
 - `PUT /api/v1/bookings/{id}` - Update booking
 - `DELETE /api/v1/bookings/{id}` - Cancel booking
+- `GET /api/v1/bookings/upcoming` - Get upcoming bookings
+- `GET /api/v1/bookings/customer/{customer_id}` - Get bookings by customer
 
-### Admin Endpoints (To be implemented)
+### Admin Endpoints
 
-- Full CRUD operations on all resources
-
-## Default Credentials
-
-After initialization, you can use these test accounts:
-
-**Admin:**
-
-- Email: `admin@parisclassictours.fr`
-- Password: `admin123`
-
-**Driver:**
-
-- Email: `pierre.martin@parisclassictours.fr`
-- Password: `driver123`
-
-**Customer:**
-
-- Email: `marie.lefevre@email.fr`
-- Password: `customer123`
+- Full CRUD operations on all resources (Users, Cars, Tours, Bookings)
+- `GET /api/v1/users/drivers/available` - Find available drivers
+- `PATCH /api/v1/cars/{id}/status` - Update car status
 
 ## Project Structure
 
 ```
-├── assets/              # Postman collections, documentation
 ├── bootstrap/           # Application initialization
-│   ├── dependencies.php # DI container configuration
-│   └── middleware.php   # Global middleware registration
+│   └── ...
 ├── config/              # Configuration files
-├── database/            # Database files
-│   └── init.php         # Database schema and seeding
+├── database/            # Database files and seeding
+│   ├── database.sqlite  # Default SQLite database
+│   └── seed.php         # Database schema and seeding
 ├── public/              # Web server document root
 │   ├── .htaccess        # Apache rewrite rules
 │   └── index.php        # Application entry point
 ├── src/                 # Application source code
-│   ├── controllers/     # Request handlers
-│   ├── middlewares/     # Custom middleware
-│   ├── models/          # Data models/entities
-│   ├── repositories/    # Database access layer
+│   ├── Controllers/     # Request handlers
+│   ├── Middlewares/     # Custom middleware (Auth, CORS, etc.)
+│   ├── Models/          # Data models/entities with validation
+│   ├── Repositories/    # Database access layer (Repository Pattern)
 │   └── routes/          # Route definitions
-├── tests/               # Unit and integration tests
+├── tests/               # Automated tests
+│   ├── Unit/            # Unit tests (Models)
+│   ├── Integration/     # Integration tests (Repositories)
+│   └── TestCase.php     # Base test class
 ├── .env.example         # Environment variables template
-├── .gitignore           # Git ignore rules
-├── composer.json        # PHP dependencies
+├── composer.json        # PHP dependencies and autoloading
+├── phpunit.xml          # PHPUnit configuration
 └── README.md            # This file
 ```
 
 ## Testing
 
+The project includes a comprehensive suite of unit and integration tests using PHPUnit.
+
+### Prerequisites for Testing
+- PHP SQLite extension enabled (`pdo_sqlite`)
+
+### Running Tests
+
 ```bash
-vendor/bin/phpunit
+# Run all tests
+./vendor/bin/phpunit
+
+# Run with descriptive output
+./vendor/bin/phpunit --testdox
+
+# Run specific suites
+./vendor/bin/phpunit --testsuite Unit
+./vendor/bin/phpunit --testsuite Integration
 ```
+
+### Test Coverage
+- **Unit Tests:** Validate model logic, data integrity, and business rules.
+- **Integration Tests:** Verify database interactions and repository patterns using an in-memory SQLite database.
+
 
 ## Deployment
 
