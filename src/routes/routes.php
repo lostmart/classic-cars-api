@@ -4,13 +4,14 @@ use App\Controllers\TourController;
 
 // Root welcome endpoint
 $app->get('/', function ($request, $response) {
+    $basePath = $GLOBALS['basePath'] ?? '';
     $data = [
         'success' => true,
         'message' => 'Paris Classic Tours API is running',
         'endpoints' => [
-            'health' => '/classic-cars-api/public/api/v1/health',
-            'tours' => '/classic-cars-api/public/api/v1/tours',
-            'cars' => '/classic-cars-api/public/api/v1/cars'
+            'health' => $basePath . '/api/v1/health',
+            'tours' => $basePath . '/api/v1/tours',
+            'cars' => $basePath . '/api/v1/cars'
         ],
         'version' => '1.1.0'
     ];

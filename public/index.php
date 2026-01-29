@@ -16,8 +16,10 @@ if (file_exists(__DIR__ . '/../.env')) {
 // Create app
 $app = AppFactory::create();
 
-// Set base path for subdirectory installation
-$app->setBasePath('/classic-cars-api/public');
+// Set base path for subdirectory installation (empty string for root deployment like Railway)
+$basePath = $_ENV['APP_BASE_PATH'] ?? '/classic-cars-api/public';
+$app->setBasePath($basePath);
+$GLOBALS['basePath'] = $basePath;
 
 // Add body parsing middleware
 $app->addBodyParsingMiddleware();
