@@ -1,6 +1,9 @@
 <?php
 
 require __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../src/ErrorHandler.php';
+
+App\ErrorHandler::register();
 
 use Slim\Factory\AppFactory;
 
