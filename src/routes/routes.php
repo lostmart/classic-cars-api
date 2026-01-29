@@ -2,6 +2,22 @@
 
 use App\Controllers\TourController;
 
+// Root welcome endpoint
+$app->get('/', function ($request, $response) {
+    $data = [
+        'success' => true,
+        'message' => 'Paris Classic Tours API is running',
+        'endpoints' => [
+            'health' => '/classic-cars-api/public/api/v1/health',
+            'tours' => '/classic-cars-api/public/api/v1/tours',
+            'cars' => '/classic-cars-api/public/api/v1/cars'
+        ],
+        'version' => '1.1.0'
+    ];
+    $response->getBody()->write(json_encode($data, JSON_PRETTY_PRINT));
+    return $response->withHeader('Content-Type', 'application/json');
+});
+
 // API v1 group
 $app->group('/api/v1', function ($group) {
     
